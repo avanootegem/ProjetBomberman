@@ -1,0 +1,80 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100vh;
+}
+
+body, section {
+    min-height: 100vh;
+}
+
+#gameboard {
+    position: absolute;
+    display: flex;
+    flex-wrap: wrap;
+
+    width: 90vh;
+    height: 90vh;
+
+    top: 5vh;
+    left: 25vw;
+}
+
+#player {
+    position: absolute;
+    width : 3.5%;
+    height : 3.5%;
+
+    top : calc(100%/21 *10);
+    left : calc(100%/21 *10);
+
+    margin-top : 0.65%;
+    margin-left : 0.65%;
+
+    background-color: blue;
+
+    border-radius: 50%;
+}
+
+.block {
+    width: calc(100%/21);
+    height: calc(100%/21);
+    display: inline-block;
+}
+
+.wall {
+    background-color: black
+}
+
+.in {
+    background-color: rgb(215,215,215);
+}
+
+.out {
+    background-color: white;
+}
+
+.onlyPlayer {
+    background-color: rgba(0, 0, 255, 0.2);
+}
+
+.spawn {
+    background-color: rgba(170, 50, 10, 0.4);
+}
+
+.stone {
+    background-color: rgb(215,215,215);
+    background-image: url(../img/rocher.png);
+    background-size: cover;
+}
+
+.bombe {
+    background-image: url(../img/bombe.png);
+    background-size: cover;
+}
+
+#block_i9_j10 {
+    border-top: solid blue;
+}
