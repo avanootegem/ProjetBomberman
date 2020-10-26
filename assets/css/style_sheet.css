@@ -24,18 +24,17 @@ body, section {
 
 #player {
     position: absolute;
-    width : 3.5%;
-    height : 3.5%;
+    width : calc((100%/21)*1.3);
+    height : calc((100%/21)*1.3);
 
     top : calc(100%/21 *10);
     left : calc(100%/21 *10);
 
-    margin-top : 0.65%;
-    margin-left : 0.65%;
+    transform: translate(-10%, -10%);
 
-    background-color: blue;
+    background-image: url(../img/CAR2.gif);
+    background-size: cover;
 
-    border-radius: 50%;
 }
 
 .block {
@@ -77,4 +76,17 @@ body, section {
 
 #block_i9_j10 {
     border-top: solid blue;
+}
+
+.mobs {
+    position: absolute;
+    width : calc(100%/21);
+    height : calc(100%/21);
+
+    top : calc(100%/21 *1);
+    left : calc(100%/21 *1);
+
+    background-image: url(../img/testmob.png);
+    background-size: cover;
+
 }
