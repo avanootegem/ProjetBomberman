@@ -32,7 +32,7 @@ body, section {
 
     transform: translate(-10%, -10%);
 
-    background-image: url(../img/CAR2.gif);
+    background-image: url(../img/Carapuce.gif);
     background-size: cover;
 
 }
@@ -83,10 +83,27 @@ body, section {
     width : calc(100%/21);
     height : calc(100%/21);
 
-    top : calc(100%/21 *1);
-    left : calc(100%/21 *1);
-
-    background-image: url(../img/testmob.png);
+    background-image: url(../img/mobs.png);
     background-size: cover;
 
+}
+
+#mob1 {
+    top : calc(100%/21 *1);
+    left : calc(100%/21 *1);
+}
+
+#mob2 {
+    top : calc(100%/21 *1);
+    left : calc(100%/21 *19);
+}
+
+#mob3 {
+    top : calc(100%/21 *19);
+    left : calc(100%/21 *1);
+}
+
+#mob4 {
+    top : calc(100%/21 *19);
+    left : calc(100%/21 *19);
 }

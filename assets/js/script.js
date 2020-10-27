@@ -1,4 +1,9 @@
-const game = document.getElementById("gameboard");
+const section = document.querySelector("section");
+const game = document.createElement("div");
+game.id = "gameboard";
+
+section.append(game);
+
 let plateau =
     [
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -32,9 +37,12 @@ let vitessePlayer = 250;
 game.append(player);
 player.id = "player";
 
+let taille = Math.ceil(game.offsetHeight / 21) - 1;
+console.log(taille);
+
 let stylePlayer = player.style;
-let jPlayer = parseInt((player.offsetLeft + 10) / 38),
-    iPlayer = parseInt((player.offsetTop + 10) / 38);
+let iPlayer = parseInt((player.offsetTop) / taille),
+    jPlayer = parseInt((player.offsetLeft) / taille);
 
 let jBomb = 0,
     iBomb = 0;
@@ -42,19 +50,78 @@ let jBomb = 0,
 let nbrBomb = 1,
     puissance = 1;
 
-let lastMove = "Bot";
+let turnExplosion = 0,
+    turnExplosionMob = 0;
+
+let firstmove = false;
+lastMove = "Bot";
 stylePlayer.transition = (vitessePlayer / 1000) + "s";
 
-// const mob1 = document.createElement("div");
-// mob1.classList = "mobs";
-// mob1.style.transition = (200 / 1000) + "s";
-// game.append(mob1);
+let characters = [{ "name": "player", "life": 3}];
+let nbrMobs = 0;
 
+for (let i = 1; i <= 4; i++) {
+    const mob = document.createElement("div");
+    mob.className = "mobs";
+    mob.id = "mob" + i;
+    mob.style.transition = (250 / 1000) + "s";
+    game.append(mob);
+
+    nbrMobs++;
+    characters.push({ "name": "mob" + i, "onLife": true, "deleted": false, "lastMove": "none", "orientation": "right" })
+}
+
+let mobDestruction = setInterval(() => {
+    for (let i = 1; i < characters.length; i++) {
+        if (characters[i]["deleted"] === false) {
+            const mobs = document.getElementById("mob" + i);
+            if (characters[i]["onLife"] === false) {
+                characters[i]["deleted"] = true;
+                console.log("coucou");
+                mobs.remove();
+            }
+        }
+    }
+}, 50);
+
+let playerOnMob = setInterval(() => {
+    for (let i = 1; i < characters.length; i++) {
+        if (characters[i]["onLife"] === true) {
+            const mobs = document.getElementById("mob" + i);
+            let iMobs = parseInt((mobs.offsetTop) / taille),
+                jMobs = parseInt((mobs.offsetLeft) / taille);
+
+            if (iPlayer === iMobs && jPlayer === jMobs) {
+                damageByMob();
+            }
+        }
+    }
+}, 50);
+
+const divDefeat = document.createElement("div");
+divDefeat.append("PERDU !");
+
+let dead = setInterval(() => {
+    if (characters[0]['life'] <= 0) {
+        clearInterval(playerOnMob),
+            clearInterval(mobDestruction),
+            clearInterval(moveMob);
+
+        game.remove();
+        section.append(divDefeat);
+        clearInterval(dead);
+    }
+}, 50);
 
 document.addEventListener("keydown", e => {
+    if (firstmove === false) {
+        moveMob = setInterval(() => {
+            randomMove();
+        }, 750);
+    }
+    firstmove = true;
+
     let keyCode = e.key;
-    randomMove(mob1);
-    console.log(parseInt((mob1.offsetLeft + 10) / 38), parseInt((mob1.offsetTop + 10) / 38));
     const divTop1 = document.getElementById("block_i" + (iPlayer - 1) + "_j" + jPlayer),
         divBot1 = document.getElementById("block_i" + (iPlayer + 1) + "_j" + jPlayer),
         divLeft1 = document.getElementById("block_i" + iPlayer + "_j" + (jPlayer - 1)),
@@ -62,14 +129,13 @@ document.addEventListener("keydown", e => {
     console.log(divTop1.classList.value)
 
     switch (keyCode) {
-        
+
         case "ArrowUp":
         case "z":
             stylePlayer.transition = (200 / 1000) + "s";
             if ((plateau[iPlayer - 1][jPlayer] === 1 || plateau[iPlayer - 1][jPlayer] === 2 || plateau[iPlayer - 1][jPlayer] === 3) && divTop1.classList.value !== "block in bombe") {
                 iPlayer--;
             }
-            stylePlayer.transform = "rotate(180deg) translate(10%, 10%)";
             lastMove = "Top";
             break;
 
@@ -78,15 +144,6 @@ document.addEventListener("keydown", e => {
             stylePlayer.transition = (200 / 1000) + "s";
             if ((plateau[iPlayer + 1][jPlayer] === 1 || plateau[iPlayer + 1][jPlayer] === 2) && divBot1.classList.value !== "block in bombe") {
                 iPlayer++;
-            }
-            if (lastMove === "Right") {
-                stylePlayer.transform = "rotate(360deg) translate(-10%, -10%)";
-                setTimeout(function () {
-                    stylePlayer.transition = 0 + "s";
-                    stylePlayer.transform = "rotate(0deg) translate(-10%, -10%)";
-                }, 100)
-            } else {
-                stylePlayer.transform = "rotate(0deg) translate(-10%, -10%)";
             }
             lastMove = "Bot";
             break;
@@ -101,7 +158,7 @@ document.addEventListener("keydown", e => {
                 setTimeout(function () { stylePlayer.display = "initial" }, vitessePlayer + 100);
                 jPlayer = 20;
             }
-            stylePlayer.transform = "rotate(90deg) translate(-10%, 10%)";
+            stylePlayer.backgroundImage = "url(assets/img/Carapuce.gif)";
             lastMove = "Left";
             break;
 
@@ -115,146 +172,155 @@ document.addEventListener("keydown", e => {
                 setTimeout(function () { stylePlayer.display = "initial" }, vitessePlayer + 100);
                 jPlayer = 0;
             }
-            if (lastMove === "Bot") {
-                setTimeout(function () {
-                    stylePlayer.transition = 0 + "s";
-                    stylePlayer.transform = "rotate(360deg) translate(-10%, -10%)";
-                    setTimeout(function () {
-                        stylePlayer.transition = (200 / 1000) + "s";
-                        stylePlayer.transform = "rotate(270deg) translate(10%, -10%)";
-                    })
-                }, 100)
-            } else {
-                stylePlayer.transform = "rotate(270deg) translate(10%, -10%)";
-            }
+            stylePlayer.backgroundImage = "url(assets/img/Carapuce_bis.gif)";
             lastMove = "Right";
             break;
 
         case " ":
+            turnExplosion = 0, turnExplosionMob = 0;
             if (nbrBomb !== 0) {
-            const bombe = document.querySelector("#block_i" + iPlayer + "_j" + jPlayer);
-            nbrBomb -= 1;
-            bombe.classList.add("bombe");
-            iBomb = iPlayer;
-            jBomb = jPlayer;
+                const bombe = document.querySelector("#block_i" + iPlayer + "_j" + jPlayer);
+                nbrBomb -= 1;
+                bombe.classList.add("bombe");
+                iBomb = iPlayer;
+                jBomb = jPlayer;
 
-            setTimeout(function () {
-                bombe.classList.remove("bombe");
+                setTimeout(function () {
+                    bombe.classList.remove("bombe");
 
-                for (let i = 1; i <= puissance; i++) {
-                    const divTop = document.getElementById("block_i" + (iBomb - i) + "_j" + jBomb);
+                    for (let i = 1; i <= puissance; i++) {
+                        const divTop = document.getElementById("block_i" + (iBomb - i) + "_j" + jBomb);
 
-                    if (plateau[iBomb - i][jBomb] === 1 || plateau[iBomb - i][jBomb] === 2 || plateau[iBomb - i][jBomb] === 5) {
-                        if (plateau[iBomb - i][jBomb] === 5) {
-                            plateau[iBomb - i][jBomb] = 1;
-                            divTop.classList.remove("stone");
-                            divTop.classList.add("in");
-                            i = puissance;
-                        }
-                        divTop.style.backgroundColor = "orangered";
-                        setTimeout(function () {
-                            if (plateau[iBomb - i][jBomb] === 2) {
-                                divTop.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
-                            } else {
-                                divTop.style.backgroundColor = "rgb(215,215,215)";
+                        if (plateau[iBomb - i][jBomb] === 1 || plateau[iBomb - i][jBomb] === 2 || plateau[iBomb - i][jBomb] === 5) {
+                            if (plateau[iBomb - i][jBomb] === 5) {
+                                plateau[iBomb - i][jBomb] = 1;
+                                divTop.classList.remove("stone");
+                                divTop.classList.add("in");
+                                i = puissance;
                             }
-                        }, 1000);
-                    }
+                            divTop.style.backgroundColor = "orangered";
+                            setTimeout(function () {
+                                if (plateau[iBomb - i][jBomb] === 2) {
+                                    divTop.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
+                                } else {
+                                    divTop.style.backgroundColor = "rgb(215,215,215)";
+                                }
+                            }, 1000);
 
-                    if (plateau[iBomb - i][jBomb] !== 1 && plateau[iBomb - i][jBomb] !== 2) {
-                        i = puissance;
-                    }
-                }
 
-                for (let i = 1; i <= puissance; i++) {
-                    const divBot = document.getElementById("block_i" + (iBomb + i) + "_j" + jBomb);
-                    if (plateau[iBomb + i][jBomb] === 1 || plateau[iBomb + i][jBomb] === 2 || plateau[iBomb + i][jBomb] === 5) {
-                        if (plateau[iBomb + i][jBomb] === 5) {
-                            plateau[iBomb + i][jBomb] = 1;
-                            divBot.classList.remove("stone");
-                            divBot.classList.add("in");
-                            i = puissance;
+
+                            if (plateau[iBomb - i][jBomb] !== 1 && plateau[iBomb - i][jBomb] !== 2) {
+                                i = puissance;
+                            }
                         }
 
-                        divBot.style.backgroundColor = "orangered";
-                        setTimeout(function () {
-                            if (plateau[iBomb + i][jBomb] === 2) {
-                                divBot.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
-                            } else {
-                                divBot.style.backgroundColor = "rgb(215,215,215)";
+                        for (let i = 1; i <= puissance; i++) {
+                            const divBot = document.getElementById("block_i" + (iBomb + i) + "_j" + jBomb);
+                            if (plateau[iBomb + i][jBomb] === 1 || plateau[iBomb + i][jBomb] === 2 || plateau[iBomb + i][jBomb] === 5) {
+                                if (plateau[iBomb + i][jBomb] === 5) {
+                                    plateau[iBomb + i][jBomb] = 1;
+                                    divBot.classList.remove("stone");
+                                    divBot.classList.add("in");
+                                    i = puissance;
+                                }
+
+                                divBot.style.backgroundColor = "orangered";
+                                setTimeout(function () {
+                                    if (plateau[iBomb + i][jBomb] === 2) {
+                                        divBot.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
+                                    } else {
+                                        divBot.style.backgroundColor = "rgb(215,215,215)";
+                                    }
+                                }, 1000);
                             }
-                        }, 1000);
-                    }
 
-                    if (plateau[iBomb + i][jBomb] !== 1 && plateau[iBomb + i][jBomb] !== 2) {
-                        i = puissance;
-                    }
-                }
-
-                for (let i = 1; i <= puissance; i++) {
-                    const divLeft = document.getElementById("block_i" + iBomb + "_j" + (jBomb - i));
-                    if (plateau[iBomb][jBomb - i] === 1 || plateau[iBomb][jBomb - i] === 2 || plateau[iBomb][jBomb - i] === 5) {
-                        if (plateau[iBomb][jBomb - i] === 5) {
-                            plateau[iBomb][jBomb - i] = 1;
-                            divLeft.classList.remove("stone");
-                            divLeft.classList.add("in");
-                            i = puissance;
+                            if (plateau[iBomb + i][jBomb] !== 1 && plateau[iBomb + i][jBomb] !== 2) {
+                                i = puissance;
+                            }
                         }
 
-                        divLeft.style.backgroundColor = "orangered";
-                        setTimeout(function () {
-                            if (plateau[iBomb][jBomb - i] === 2) {
-                                divLeft.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
-                            } else {
-                                divLeft.style.backgroundColor = "rgb(215,215,215)";
+                        for (let i = 1; i <= puissance; i++) {
+                            const divLeft = document.getElementById("block_i" + iBomb + "_j" + (jBomb - i));
+                            if (plateau[iBomb][jBomb - i] === 1 || plateau[iBomb][jBomb - i] === 2 || plateau[iBomb][jBomb - i] === 5) {
+                                if (plateau[iBomb][jBomb - i] === 5) {
+                                    plateau[iBomb][jBomb - i] = 1;
+                                    divLeft.classList.remove("stone");
+                                    divLeft.classList.add("in");
+                                    i = puissance;
+                                }
+
+                                divLeft.style.backgroundColor = "orangered";
+                                setTimeout(function () {
+                                    if (plateau[iBomb][jBomb - i] === 2) {
+                                        divLeft.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
+                                    } else {
+                                        divLeft.style.backgroundColor = "rgb(215,215,215)";
+                                    }
+                                }, 1000);
                             }
-                        }, 1000);
-                    }
 
-                    if (plateau[iBomb][jBomb - i] !== 1 && plateau[iBomb][jBomb - i] !== 2) {
-                        i = puissance;
-                    }
-                }
-
-                for (let i = 1; i <= puissance; i++) {
-                    const divRight = document.getElementById("block_i" + iBomb + "_j" + (jBomb + i));
-                    if (plateau[iBomb][jBomb + i] === 1 || plateau[iBomb][jBomb + i] === 2 || plateau[iBomb][jBomb + i] === 5) {
-                        if (plateau[iBomb][jBomb + i] === 5) {
-                            plateau[iBomb][jBomb + i] = 1;
-                            divRight.classList.remove("stone");
-                            divRight.classList.add("in");
-                            i = puissance;
+                            if (plateau[iBomb][jBomb - i] !== 1 && plateau[iBomb][jBomb - i] !== 2) {
+                                i = puissance;
+                            }
                         }
 
-                        divRight.style.backgroundColor = "orangered";
-                        setTimeout(function () {
-                            if (plateau[iBomb][jBomb + i] === 2) {
-                                divRight.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
-                            } else {
-                                divRight.style.backgroundColor = "rgb(215,215,215)";
+                        for (let i = 1; i <= puissance; i++) {
+                            const divRight = document.getElementById("block_i" + iBomb + "_j" + (jBomb + i));
+                            if (plateau[iBomb][jBomb + i] === 1 || plateau[iBomb][jBomb + i] === 2 || plateau[iBomb][jBomb + i] === 5) {
+                                if (plateau[iBomb][jBomb + i] === 5) {
+                                    plateau[iBomb][jBomb + i] = 1;
+                                    divRight.classList.remove("stone");
+                                    divRight.classList.add("in");
+                                    i = puissance;
+                                }
+
+                                divRight.style.backgroundColor = "orangered";
+                                setTimeout(function () {
+                                    if (plateau[iBomb][jBomb + i] === 2) {
+                                        divRight.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
+                                    } else {
+                                        divRight.style.backgroundColor = "rgb(215,215,215)";
+                                    }
+
+                                }, 1000);
                             }
 
-                        }, 1000);
-                    }
-
-                    if (plateau[iBomb][jBomb] === 1 || plateau[iBomb][jBomb] === 2) {
-                        bombe.style.backgroundColor = "orangered";
-                        setTimeout(function () {
-                            if (plateau[iBomb][jBomb] === 2) {
-                                bombe.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
-                            } else {
-                                bombe.style.backgroundColor = "rgb(215,215,215)";
+                            if (plateau[iBomb][jBomb] === 1 || plateau[iBomb][jBomb] === 2) {
+                                bombe.style.backgroundColor = "orangered";
+                                setTimeout(function () {
+                                    if (plateau[iBomb][jBomb] === 2) {
+                                        bombe.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
+                                    } else {
+                                        bombe.style.backgroundColor = "rgb(215,215,215)";
+                                    }
+                                }, 1000);
                             }
-                        }, 1000);
-                    }
 
-                    if (plateau[iBomb][jBomb + i] !== 1 && plateau[iBomb][jBomb + i] !== 2) {
-                        i = puissance;
+                            if (plateau[iBomb][jBomb + i] !== 1 && plateau[iBomb][jBomb + i] !== 2) {
+                                i = puissance;
+                            }
+                        }
+
+                        let damagePlayer = setInterval(() => {
+                            damageOnPlayer();
+
+                            if (turnExplosion === 150) {
+                                clearInterval(damagePlayer);
+                            }
+                        }, 10);
+
+                        let damageMob = setInterval(() => {
+                            damageOnMob();
+
+                            if (turnExplosionMob === 150) {
+                                clearInterval(damageMob);
+                            }
+                        }, 10);
                     }
-                }
-                nbrBomb = 1;}, 3000);
-            
-        }
+                    nbrBomb = 1;
+                }, 3000);
+
+            }
         default:
             break;
     }
@@ -298,6 +364,3 @@ for (let i = 0; i < plateau.length; i++) {
         }
     }
 }
-
-let mob1 = new Mobs(1, 1);
-console.log(mob1);
