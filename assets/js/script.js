@@ -57,8 +57,9 @@ let firstmove = false;
 lastMove = "Bot";
 stylePlayer.transition = (vitessePlayer / 1000) + "s";
 
-let characters = [{ "name": "player", "life": 3}];
-let nbrMobs = 0;
+let characters = [{ "name": "player", "life": 3 }];
+let nbrMobs = 0,
+    nbrMobsDead = 0;
 
 for (let i = 1; i <= 4; i++) {
     const mob = document.createElement("div");
@@ -78,6 +79,7 @@ let mobDestruction = setInterval(() => {
             if (characters[i]["onLife"] === false) {
                 characters[i]["deleted"] = true;
                 console.log("coucou");
+                nbrMobsDead++;
                 mobs.remove();
             }
         }
@@ -99,16 +101,31 @@ let playerOnMob = setInterval(() => {
 }, 50);
 
 const divDefeat = document.createElement("div");
-divDefeat.append("PERDU !");
+divDefeat.append("DEFAITE !");
+divDefeat.id = "end";
+
+const divVictory = document.createElement("div");
+divVictory.append("VICTOIRE !");
+divVictory.id = "end";
 
 let dead = setInterval(() => {
     if (characters[0]['life'] <= 0) {
         clearInterval(playerOnMob),
-            clearInterval(mobDestruction),
-            clearInterval(moveMob);
+        clearInterval(mobDestruction),
+        clearInterval(moveMob);
 
         game.remove();
         section.append(divDefeat);
+        clearInterval(dead);
+    }
+
+    if (nbrMobsDead === 4) {
+        clearInterval(playerOnMob),
+        clearInterval(mobDestruction),
+        clearInterval(moveMob);
+
+        game.remove();
+        section.append(divVictory);
         clearInterval(dead);
     }
 }, 50);
@@ -203,7 +220,7 @@ document.addEventListener("keydown", e => {
                                 if (plateau[iBomb - i][jBomb] === 2) {
                                     divTop.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
                                 } else {
-                                    divTop.style.backgroundColor = "rgb(215,215,215)";
+                                    divTop.style.backgroundColor = "rgb(230,230,230)";
                                 }
                             }, 1000);
 
@@ -229,7 +246,7 @@ document.addEventListener("keydown", e => {
                                     if (plateau[iBomb + i][jBomb] === 2) {
                                         divBot.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
                                     } else {
-                                        divBot.style.backgroundColor = "rgb(215,215,215)";
+                                        divBot.style.backgroundColor = "rgb(230,230,230)";
                                     }
                                 }, 1000);
                             }
@@ -254,7 +271,7 @@ document.addEventListener("keydown", e => {
                                     if (plateau[iBomb][jBomb - i] === 2) {
                                         divLeft.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
                                     } else {
-                                        divLeft.style.backgroundColor = "rgb(215,215,215)";
+                                        divLeft.style.backgroundColor = "rgb(230,230,230)";
                                     }
                                 }, 1000);
                             }
@@ -279,7 +296,7 @@ document.addEventListener("keydown", e => {
                                     if (plateau[iBomb][jBomb + i] === 2) {
                                         divRight.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
                                     } else {
-                                        divRight.style.backgroundColor = "rgb(215,215,215)";
+                                        divRight.style.backgroundColor = "rgb(230,230,230)";
                                     }
 
                                 }, 1000);
@@ -291,7 +308,7 @@ document.addEventListener("keydown", e => {
                                     if (plateau[iBomb][jBomb] === 2) {
                                         bombe.style.backgroundColor = "rgba(0, 0, 255, 0.2)"
                                     } else {
-                                        bombe.style.backgroundColor = "rgb(215,215,215)";
+                                        bombe.style.backgroundColor = "rgb(230,230,230)";
                                     }
                                 }, 1000);
                             }

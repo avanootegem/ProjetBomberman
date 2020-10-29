@@ -129,7 +129,7 @@ function randomMove() {
                 mobs.style.top = String(iMobs * (100 / 21)) + '%';
                 mobs.style.left = String(jMobs * (100 / 21)) + '%';
 
-                mobs.style.transition = "0.2s, background 0s"
+                mobs.style.transition = "0.40s, background 0s"
                 if (characters[i]["orientation"] === "right") {
                     characters[i]["orientation"] = "left";
                     mobs.style.backgroundImage = "url(assets/img/mobs_bis.png)";
